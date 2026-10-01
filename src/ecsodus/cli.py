@@ -1,7 +1,7 @@
 """ecsodus command line (PLAN §2).
 
     ecsodus inventory --app APP [--env ENV ...] [--keep-on-copilot NAME ...] -o inventory.json
-    ecsodus report    inventory.json [-o REPORT.md]
+    ecsodus report    inventory.json [-o REPORT.md] [--html]
     ecsodus generate  inventory.json --out DIR [--patch-bucket B] [--metadata-fallback]
     ecsodus check     PLAN.json --manifest M --phase import|steady
     ecsodus check     --state state.txt --manifest M
@@ -71,12 +71,14 @@ def cmd_report(a: argparse.Namespace) -> int:
     from ecsodus.mappers.fates import build_plan
 
     inv = _load_inventory(a.inventory, allow_stale=True)
-    text = report.render(build_plan(inv))
-    if a.output == "-":
+    plan = build_plan(inv)
+    text = report.render_html(plan) if a.html else report.render(plan)
+    output = a.output or ("REPORT.html" if a.html else "REPORT.md")
+    if output == "-":
         sys.stdout.write(text)
     else:
-        Path(a.output).write_text(text)
-        print(f"wrote {a.output}")
+        Path(output).write_text(text)
+        print(f"wrote {output}")
     return 0
 
 
@@ -358,7 +360,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("report", help="write the readiness report")
     s.add_argument("inventory")
-    s.add_argument("-o", "--output", default="REPORT.md")
+    s.add_argument("-o", "--output")
+    s.add_argument("--html", action="store_true", help="write a standalone HTML report")
     s.set_defaults(fn=cmd_report)
 
     s = sub.add_parser("generate", help="write Terraform, retain patches, report and runbook")

@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `ecsodus report --html` writes the readiness report as a standalone HTML file.
+
 ## [0.1.2] - 2026-09-30
 
 Metadata and documentation only: no code changes since 0.1.1.

@@ -162,7 +162,7 @@ def test_stale_inventory_refused(tmp_path: Path) -> None:
         main(["generate", str(path), "--out", str(tmp_path / "o"), "--patch-bucket", "b"])
 
 
-def test_report_command(tmp_path: Path) -> None:
+def test_report_command(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     inv = app(worker_type="Worker Service")
     path = tmp_path / "inventory.json"
     inv.save(path)
@@ -172,6 +172,15 @@ def test_report_command(tmp_path: Path) -> None:
     assert "keep the CloudFormation" in text
     assert "Worker Service" in text and "kept" in text
     assert "Deleting this stack <b>without</b> the retain patch" in text
+
+    monkeypatch.chdir(tmp_path)
+    assert main(["report", str(path), "--html"]) == 0
+    html = (tmp_path / "REPORT.html").read_text()
+    assert html.startswith("<!doctype html>")
+    assert "<table>" in html
+    assert "<strong>Verdict:</strong>" in html
+    assert "<details>" in html
+    assert "Worker Service" in html and "kept" in html
 
 
 @pytest.mark.terraform

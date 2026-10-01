@@ -38,6 +38,12 @@ Shared stacks those workloads need (their environment, the app stack) are then k
 ecsodus report inventory.json -o REPORT.md
 ```
 
+For a standalone copy you can open in a browser or send to someone who does not use GitHub:
+
+```bash
+ecsodus report inventory.json --html -o REPORT.html
+```
+
 The report covers:
 - the verdict
 - each workload's status
